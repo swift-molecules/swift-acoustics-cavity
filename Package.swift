@@ -22,6 +22,9 @@ let package = Package(
         .package(url: "https://github.com/swift-atoms/swift-point.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-space.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-frequency.git", branch: "main"),
+        .package(url: "https://github.com/swift-atoms/swift-mass.git", branch: "main"),
+        .package(url: "https://github.com/swift-molecules/swift-acoustics-plate.git", branch: "main"),
+        .package(url: "https://github.com/swift-atoms/swift-mesh.git", branch: "main"),
     ],
     targets: [
         .target(
@@ -34,12 +37,15 @@ let package = Package(
                 .product(name: "Point", package: "swift-point"),
                 .product(name: "Space", package: "swift-space"),
                 .product(name: "Frequency", package: "swift-frequency"),
+                .product(name: "Mass", package: "swift-mass"),
             ]
         ),
         .testTarget(
             name: "Acoustics Cavity Tests",
             dependencies: [
-                .target(name: "Acoustics Cavity")
+                .target(name: "Acoustics Cavity"),
+                .product(name: "Acoustics Plate", package: "swift-acoustics-plate"),
+                .product(name: "Mesh", package: "swift-mesh"),
             ]
         ),
     ],
