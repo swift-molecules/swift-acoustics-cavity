@@ -1,7 +1,15 @@
 # swift-acoustics-cavity
 
-Use this package when a sound depends on the air enclosed in a body, such as a lute's bowl or a guitar's body: the air's acoustic modes by finite elements on swift-galerkin. Being built; see swift-institute/Issues#339.
+Use this package when a sound depends on the air enclosed in a body, such as a lute's bowl or a guitar's body with its rose or sound hole. Give `Acoustics.Cavity` the air as a volume of hexahedra or tetrahedra, with vertices in metres, and name the vertices where its pressure is released; every other boundary is a rigid wall. A body with an opening is given with some of the air outside it, whose far boundary is released. `Acoustics.Cavity.Modes` gives the lowest acoustic modes for an `Acoustics.Air`, each with its frequency, its pressure shape at every vertex and its modal volume. Compute them once and keep the value. Coupling to a wall, such as a soundboard from swift-acoustics-plate, goes through the shapes on that wall and the modal volumes. The modes come from finite elements: the weak Helmholtz equation on swift-galerkin's trilinear hexahedra and linear tetrahedra, assembled into a sparse stiffness and mass of swift-sparse, whose lowest eigenpairs swift-eigen finds.
 
 ## Laws
 
-- None yet.
+- **Geometry.** A cell has eight corners in the order of swift-galerkin's `Galerkin.Reference.Hexahedron`, or four in the order of its `Tetrahedron`. A cell listed the other way round is turned. A cell with another number of corners, a corner that names no vertex, or a Jacobian that is not positive at every Gauss point fails with `.cell(index)`.
+- **Physics.** The pressure obeys ∇²p + k²p = 0 with k = ω / c. A rigid wall is the natural boundary condition, ∂p/∂n = 0, and an open vertex holds p = 0. Air is lossless and its density does not enter the frequencies.
+- **Modes.** The `count` lowest, ascending, a repeated frequency once per mode. A cavity with no open vertex has a first mode at zero frequency to rounding, whose shape is one everywhere and whose modal volume is the cavity's volume. Each shape is the pressure at every vertex, open ones zero, scaled so that its largest value is 1. `volume` is the modal volume at that scale, Λ = ∫ shape² dV. A wall moving with normal acceleration a drives the mode's amplitude q, the pressure q × shape, by q̈ + ω²q = −(ρc² / Λ) ∫ shape a dS. A cavity scaled by s in every length rings at 1/s the frequency, with s³ the modal volume. Frequencies are proportional to the speed of sound.
+- **Element.** Consistent mass. The cube's Gauss rule is of degree 3 and the tetrahedron's of degree 2. Frequencies converge at second order in the cell size.
+- **Checked against** closed forms:
+  - **Rigid box**, 0.5 × 0.4 × 0.3 m: the first nine nonzero modes within 0.5% with hexahedra and within 2% with tetrahedra.
+  - **Rigid cylinder**, radius 0.15 m and height 0.3 m: f = (c/2π)√((j′/a)² + (pπ/h)²), the first eight nonzero modes, pairs included, within 1%.
+  - **Rigid sphere**, radius 0.2 m: f = c x / 2πa at the zeros x of jₗ′ for l = 1, 2, 0 and 3, sixteen modes with their multiplicities, within 1%.
+  - **Helmholtz resonator**, a cylindrical body of radius 0.1 m and depth 0.1 m with a neck of radius 1 cm and length 2 cm, opening through a flange into air released 0.3 m away: within 2% of Ingard (1953, J. Acoust. Soc. Am. 25, 1037), f = (c/2π)√(S / V L′), with the end corrections 0.85a outside and 0.85a(1 − 1.25a/R) inside. Extrapolated to no cell size, it is within 1%. The rim of the neck is singular, so cells must be fine there.
