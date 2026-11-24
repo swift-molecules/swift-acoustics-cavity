@@ -89,8 +89,12 @@ extension `Acoustics.Cavity Tests`.Body {
     }
 
     /// The top's modes as a wall of the air, which lies below it: a deflection up is out of the air.
-    static func wall(_ modes: Acoustics.Plate.Modes, top: Top, vertices count: Int, loss: Double)
-        -> Acoustics.Cavity.Wall
+    static func wall(
+        _ modes: Acoustics.Plate.Modes,
+        top: Top,
+        vertices count: Int,
+        loss: Double
+    ) -> Acoustics.Cavity.Wall
     {
         Acoustics.Cavity.Wall(
             faces: top.faces,

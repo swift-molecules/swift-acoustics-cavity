@@ -36,9 +36,14 @@ extension `Acoustics.Cavity Tests`.Coupling {
 
     /// Christensen and Vistisen's two oscillators (J. Acoust. Soc. Am. 68 (1980) 758, Eqs. 2, 5, 7 and 8): a
     /// plate of area A, mass m_p and stiffness k_p and an air piston of area S and mass m_a on a cavity of volume V.
-    static func twoOscillators(fp0: Double, mp: Double, area a: Double, s: Double, ma: Double, volume v: Double) -> (
-        Double, Double
-    ) {
+    static func twoOscillators(
+        fp0: Double,
+        mp: Double,
+        area a: Double,
+        s: Double,
+        ma: Double,
+        volume v: Double
+    ) -> (Double, Double) {
         let air = Acoustics.Air.room
         let mu = air.density.underlying * air.speed.underlying * air.speed.underlying / v
         let kp = mp * (2 * Double.pi * fp0) * (2 * Double.pi * fp0)

@@ -244,7 +244,7 @@ extension Acoustics.Cavity.Coupling.System {
         }
         self.wallStiffness = wallStiffness
         self.wallLoss = wallLoss
-        self.wallCounts = walls.map(\.modes.count)
+        self.wallCounts = walls.map { $0.modes.count }
         self.openingCount = openings.count
         self.swept = swept
         self.density = density
