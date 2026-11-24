@@ -136,6 +136,7 @@ extension `Acoustics.Cavity Tests`.Lute {
             if top && options.bars { bars += Self.bars }
             if top && options.bridge { bars.append(Self.bridge) }
             let used = Set(faces.flatMap { $0 })
+            let clamped = Acoustics.Shell.Hold.clamped
             return Acoustics.Shell(
                 mesh: mesh,
                 thickness: Space.Physical.metres(options.ribs),
@@ -144,8 +145,7 @@ extension `Acoustics.Cavity Tests`.Lute {
                 thicknesses: thicknesses,
                 materials: materials,
                 bars: bars,
-                held: Dictionary(
-                    uniqueKeysWithValues: held.intersection(used).map { ($0, Acoustics.Shell.Hold.clamped) })
+                held: Dictionary(uniqueKeysWithValues: held.intersection(used).map { ($0, clamped) })
             )
         }
         func wall(_ modes: Acoustics.Shell.Modes, faces: [[Int]]) -> Acoustics.Cavity.Wall {
@@ -165,15 +165,15 @@ extension `Acoustics.Cavity Tests`.Lute {
         var shells: [Acoustics.Shell.Modes] = []
         switch options.bowl {
         case .rigid:
-            let modes = try Acoustics.Shell.Modes(
-                try shell(top, ribs: false, top: true, held: rim.union(neck)), count: 20)
+            let alone = try shell(top, ribs: false, top: true, held: rim.union(neck))
+            let modes = try Acoustics.Shell.Modes(alone, count: 20)
             shells = [modes]
             walls = [wall(modes, faces: top)]
         case .separate:
-            let upper = try Acoustics.Shell.Modes(
-                try shell(top, ribs: false, top: true, held: rim.union(neck)), count: 20)
-            let lower = try Acoustics.Shell.Modes(
-                try shell(bowl, ribs: true, top: false, held: rim.union(neck)), count: 30)
+            let above = try shell(top, ribs: false, top: true, held: rim.union(neck))
+            let below = try shell(bowl, ribs: true, top: false, held: rim.union(neck))
+            let upper = try Acoustics.Shell.Modes(above, count: 20)
+            let lower = try Acoustics.Shell.Modes(below, count: 30)
             shells = [upper, lower]
             walls = [wall(upper, faces: top), wall(lower, faces: bowl)]
         case .joined:
