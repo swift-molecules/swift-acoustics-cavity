@@ -94,8 +94,7 @@ extension `Acoustics.Cavity Tests`.Body {
         top: Top,
         vertices count: Int,
         loss: Double
-    ) -> Acoustics.Cavity.Wall
-    {
+    ) -> Acoustics.Cavity.Wall {
         Acoustics.Cavity.Wall(
             faces: top.faces,
             modes: modes.map { mode in
