@@ -64,14 +64,16 @@ extension Acoustics.Cavity.Coupling: RandomAccessCollection {
 }
 
 extension Acoustics.Cavity.Coupling {
-    /// How far each mode moves `vertex` out of the air per unit of its amplitude: the sum of its walls' modes'
-    /// displacements there, weighted by their shares. A vertex no wall covers does not move.
-    public func reach(at vertex: Int) -> [Double] {
+    /// How far each mode moves `vertex` along `direction`, a unit vector, per unit of its amplitude: the sum of its
+    /// walls' modes' motions there, weighted by their shares. A vertex no wall covers does not move.
+    ///
+    /// Struck there along `direction`, each mode is a resonator of mass `mass / r²`.
+    public func reach(at vertex: Int, along direction: Vector<3, Double>) -> [Double] {
         elements.map { mode in
             var sum = 0.0
             for (wall, shares) in zip(walls, mode.walls) {
                 for (share, wallMode) in zip(shares, wall.modes) where vertex < wallMode.displacement.count {
-                    sum += share * wallMode.displacement[vertex]
+                    sum += share * wallMode.displacement[vertex].dot(direction)
                 }
             }
             return sum
@@ -128,8 +130,8 @@ extension Acoustics.Cavity.Coupling.System {
         let isStatic = modes.map { 2 * Double.pi * $0.frequency.underlying * size / speed < 1e-3 }
         guard openings.isEmpty || isStatic.contains(true) else { throw .opening }
 
-        // ∫ N N dS over every wall's faces, applied to each air mode's shape and to one: t[w][j] and area[w] per
-        // vertex of the cavity.
+        // ∫ N N n dS over every wall's faces, n the unit normal out of the air, applied to each air mode's shape and
+        // to one: vectors per vertex of the cavity.
         let square = Galerkin.Reference.Quadrilateral.quadrature(degree: 3, Double.self)
         let triangle = Galerkin.Reference.Triangle.quadrature(degree: 2, Double.self)
         let squareShapes = square.points.map { Galerkin.Reference.Quadrilateral.shape(at: $0) }
@@ -142,8 +144,11 @@ extension Acoustics.Cavity.Coupling.System {
         // coupling[k][j] = ∫ φₖ ψⱼ dS
         var coupling: [[Double]] = []
         for (index, wall) in walls.enumerated() {
-            var weighted = [[Double]](repeating: [Double](repeating: 0, count: points.count), count: modes.count)
-            var area = [Double](repeating: 0, count: points.count)
+            var weighted = [[Vector<3, Double>]](
+                repeating: [Vector<3, Double>](repeating: .zero, count: points.count),
+                count: modes.count
+            )
+            var area = [Vector<3, Double>](repeating: .zero, count: points.count)
             for face in wall.faces {
                 guard face.count == 4 || face.count == 3, face.allSatisfy({ points.indices.contains($0) }) else {
                     throw .wall(index)
@@ -152,14 +157,14 @@ extension Acoustics.Cavity.Coupling.System {
                 let weights = face.count == 4 ? square.weights : triangle.weights
                 let corners = face.map { points[$0] }
                 for (shape, weight) in zip(shapes, weights) {
-                    let dS = weight * Galerkin.Jacobian.Surface(shape, corners: corners).determinant
+                    let dS = Galerkin.Jacobian.Surface(shape, corners: corners).normal.scaled(by: weight)
                     for (a, vertex) in face.enumerated() {
-                        let na = shape.values[a] * dS
+                        let na = dS.scaled(by: shape.values[a])
                         area[vertex] += na
                         for (j, mode) in modes.enumerated() {
                             var pressure = 0.0
                             for (b, other) in face.enumerated() { pressure += shape.values[b] * mode.shape[other] }
-                            weighted[j][vertex] += na * pressure
+                            weighted[j][vertex] += na.scaled(by: pressure)
                         }
                     }
                 }
@@ -171,12 +176,12 @@ extension Acoustics.Cavity.Coupling.System {
                 wallStiffness.append(omega * omega * mode.mass.underlying)
                 wallLoss.append(mode.loss)
                 var volume = 0.0
-                for (d, s) in zip(mode.displacement, area) { volume += d * s }
+                for (d, s) in zip(mode.displacement, area) { volume += d.dot(s) }
                 swept.append(volume)
                 coupling.append(
                     weighted.map { row in
                         var sum = 0.0
-                        for (d, w) in zip(mode.displacement, row) { sum += d * w }
+                        for (d, w) in zip(mode.displacement, row) { sum += d.dot(w) }
                         return sum
                     }
                 )

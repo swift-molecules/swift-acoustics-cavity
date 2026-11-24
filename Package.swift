@@ -24,6 +24,7 @@ let package = Package(
         .package(url: "https://github.com/swift-atoms/swift-frequency.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-mass.git", branch: "main"),
         .package(url: "https://github.com/swift-molecules/swift-acoustics-plate.git", branch: "main"),
+        .package(url: "https://github.com/swift-molecules/swift-acoustics-shell.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-mesh.git", branch: "main"),
     ],
     targets: [
@@ -45,6 +46,7 @@ let package = Package(
             dependencies: [
                 .target(name: "Acoustics Cavity"),
                 .product(name: "Acoustics Plate", package: "swift-acoustics-plate"),
+                .product(name: "Acoustics Shell", package: "swift-acoustics-shell"),
                 .product(name: "Mesh", package: "swift-mesh"),
             ]
         ),

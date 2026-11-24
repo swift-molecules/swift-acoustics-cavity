@@ -1,14 +1,15 @@
 public import Mass
 
 extension Acoustics.Cavity {
-    /// A part of a cavity's boundary that moves, such as a soundboard, given by its own modes in vacuo: the faces it
-    /// covers and, for each mode, how far each of their corners moves out of the air.
+    /// A part of a cavity's boundary that moves, such as a soundboard or a bowl, given by its own modes in vacuo: the
+    /// faces it covers and, for each mode, how each of their corners moves.
     ///
     /// A wall is whatever structure its modes come from, a plate, a shell or a membrane; the air needs only where
     /// it moves and how much mass and stiffness each mode has.
     public struct Wall {
         /// The faces the wall covers, each as three or four of the cavity's vertices, in the order of
-        /// swift-galerkin's `Galerkin.Reference.Triangle` or `Quadrilateral`; either way round.
+        /// swift-galerkin's `Galerkin.Reference.Triangle` or `Quadrilateral`, turning counterclockwise seen from
+        /// outside the air, so that their normal points out of it.
         public let faces: [[Int]]
         /// The wall's modes in vacuo.
         public let modes: [Mode]
@@ -32,16 +33,17 @@ extension Acoustics.Cavity.Wall {
         /// The loss factor η of the wall's own material, so that its stiffness is ω² m (1 + iη). Radiation is not
         /// in it: the air adds that.
         public let loss: Double
-        /// The displacement out of the air at each of the cavity's vertices, in its order, per unit of the mode's
-        /// amplitude. Only the vertices of the wall's faces are read.
-        public let displacement: [Double]
+        /// The motion of each of the cavity's vertices, in its order, per unit of the mode's amplitude. Only the
+        /// vertices of the wall's faces are read, and only the part along each face's normal moves the air, so a
+        /// vertex where two faces meet at an angle, such as on a lute's rim, moves each as it should.
+        public let displacement: [Vector<3, Double>]
 
         @inlinable
         public init(
             frequency: Frequency.Value<Double>,
             mass: Mass.Value<Double>,
             loss: Double,
-            displacement: [Double]
+            displacement: [Vector<3, Double>]
         ) {
             self.frequency = frequency
             self.mass = mass

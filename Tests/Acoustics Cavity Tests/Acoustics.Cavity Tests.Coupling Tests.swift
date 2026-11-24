@@ -6,7 +6,7 @@ extension `Acoustics.Cavity Tests` {
 }
 
 extension `Acoustics.Cavity Tests`.Coupling {
-    /// The box 0.4 × 0.3 × 0.2 m, closed, with its lid z = 0.2 a piston: one mode of displacement one over the lid.
+    /// The box 0.4 × 0.3 × 0.2 m, closed, with its lid z = 0.2 a piston: one mode moving the lid up by one.
     static let box = `Acoustics.Cavity Tests`.Solid.box(0.4, 0.3, 0.2, cells: (4, 3, 2))
 
     static var lid: [[Int]] {
@@ -15,7 +15,7 @@ extension `Acoustics.Cavity Tests`.Coupling {
     }
 
     static func piston(frequency: Double, mass: Double, loss: Double = 0) -> Acoustics.Cavity.Wall {
-        let displacement = box.vertices.map { $0.z == 0.2 ? 1.0 : 0 }
+        let displacement = box.vertices.map { Vector<3, Double>(x: 0, y: 0, z: $0.z == 0.2 ? 1.0 : 0) }
         return Acoustics.Cavity.Wall(
             faces: lid,
             modes: [
@@ -104,7 +104,7 @@ extension `Acoustics.Cavity Tests`.Coupling {
             openings: [Self.hole],
             count: 2
         )
-        let reach = body.reach(at: Self.box.vertices.firstIndex { $0.z == 0.2 }!)
+        let reach = body.reach(at: Self.box.vertices.firstIndex { $0.z == 0.2 }!, along: Vector(x: 0, y: 0, z: 1))
         func compliance(_ f: Double) -> Double {
             var sum = 0.0
             for (mode, r) in zip(body, reach) {
@@ -187,7 +187,7 @@ extension `Acoustics.Cavity Tests`.Coupling {
                     frequency: Frequency.hertz(150),
                     mass: Mass.kilograms(0.05),
                     loss: 0,
-                    displacement: [1]
+                    displacement: [Vector(x: 0, y: 0, z: 1)]
                 )
             ]
         )

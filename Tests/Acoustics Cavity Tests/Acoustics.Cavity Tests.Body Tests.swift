@@ -88,18 +88,30 @@ extension `Acoustics.Cavity Tests`.Body {
         return Top(plate: plate, vertices: used, faces: kept, hole: cut, area: area)
     }
 
-    /// The top's modes as a wall of the air, which lies below it: a deflection up is out of the air.
+    /// The top's modes as a wall of the air, which lies below it: its faces turned to face up, out of the air, and
+    /// each mode's deflection a motion along z.
     static func wall(
         _ modes: Acoustics.Plate.Modes,
         top: Top,
         vertices count: Int,
         loss: Double
     ) -> Acoustics.Cavity.Wall {
-        Acoustics.Cavity.Wall(
-            faces: top.faces,
+        let plane = top.plate.mesh.vertices
+        var renumber: [Int: Int] = [:]
+        for (index, vertex) in top.vertices.enumerated() { renumber[vertex] = index }
+        let faces = top.faces.map { face in
+            let p = face.map { plane[renumber[$0]!] }
+            var twice = 0.0
+            for i in p.indices { twice += p[i].x * p[(i + 1) % p.count].y - p[(i + 1) % p.count].x * p[i].y }
+            return twice < 0 ? Array(face.reversed()) : face
+        }
+        return Acoustics.Cavity.Wall(
+            faces: faces,
             modes: modes.map { mode in
-                var displacement = [Double](repeating: 0, count: count)
-                for (index, vertex) in top.vertices.enumerated() { displacement[vertex] = mode.shape[index] }
+                var displacement = [Vector<3, Double>](repeating: .zero, count: count)
+                for (index, vertex) in top.vertices.enumerated() {
+                    displacement[vertex] = Vector(x: 0, y: 0, z: mode.shape[index])
+                }
                 return Acoustics.Cavity.Wall.Mode(
                     frequency: mode.frequency,
                     mass: mode.mass,
@@ -128,7 +140,7 @@ extension `Acoustics.Cavity Tests`.Body {
             let (ax, ay) = (p[2].x - p[0].x, p[2].y - p[0].y)
             let (bx, by) = (p[3].x - p[1].x, p[3].y - p[1].y)
             let area = abs(ax * by - ay * bx) / 2
-            sum += area * face.map { mode.displacement[$0] }.reduce(0, +) / Double(face.count)
+            sum += area * face.map { mode.displacement[$0].z }.reduce(0, +) / Double(face.count)
         }
         return sum
     }
@@ -359,7 +371,7 @@ extension `Acoustics.Cavity Tests`.Body {
         // The input admittance at the treble end of the bridge, whose lowest peak Firth (1977) measured at 132 Hz
         // and named the air's (Rossing 2010, §3.10.1, p. 41). The lute is not Firth's, so within 15%.
         let bridge = `Acoustics.Cavity Tests`.Body.nearest(Point(x: Lute.along(11.5), y: -0.05), in: lute.mesh)
-        let reach = body.reach(at: bridge)
+        let reach = body.reach(at: bridge, along: Vector(x: 0, y: 0, z: 1))
         let frequencies = stride(from: 60.0, through: 700, by: 0.5).map { $0 }
         let magnitude = frequencies.map { `Acoustics.Cavity Tests`.Body.admittance(body, reach: reach, at: $0) }
         let peak = (1..<(frequencies.count - 1)).first {
