@@ -31,7 +31,8 @@ extension `Acoustics.Cavity Tests`.Coupling {
 
     static let hole = Acoustics.Cavity.Opening(
         area: Area<Space.Physical>.amount(0.006),
-        length: Measure<1, Space.Physical>.amount(0.08)
+        length: Measure<1, Space.Physical>.amount(0.08),
+        centre: Point(x: 0, y: 0, z: 0)
     )
 
     /// Christensen and Vistisen's two oscillators (J. Acoust. Soc. Am. 68 (1980) 758, Eqs. 2, 5, 7 and 8): a

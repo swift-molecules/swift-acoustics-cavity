@@ -183,7 +183,8 @@ extension `Acoustics.Cavity Tests`.Lute {
         }
         let opening = Acoustics.Cavity.Opening.circle(
             radius: Space.Physical.metres(0.04),
-            thickness: Space.Physical.metres(options.top)
+            thickness: Space.Physical.metres(options.top),
+            at: Point(x: along(35), y: 0, z: 0)
         )
         let body = try Acoustics.Cavity.Coupling(air, walls: walls, openings: [opening], count: 16)
         let target = (x: along(11.5), y: -0.05)
@@ -276,5 +277,22 @@ extension `Acoustics.Cavity Tests`.Lute {
             }!
             return reach[index].top > 2 * reach[index].bowl
         }!
+    }
+}
+
+extension `Acoustics.Cavity Tests`.Lute {
+    @Test
+    func `What a mode sends far away is its volume at low frequency, in every direction`() throws {
+        let model = try Self.model(Options(cells: 8))
+        let directions = [Vector<3, Double>(x: 0, y: 0, z: 1), Vector(x: 1, y: 0, z: 0), Vector(x: 0, y: -0.6, z: 0.8)]
+        let air = model.body.min { abs($0.frequency.underlying - 130) < abs($1.frequency.underlying - 130) }!
+        let index = model.body.firstIndex(of: air)!
+        // At 130 Hz the body is a tenth of a wavelength across, so every direction hears the simple source; its
+        // phase is only that of where the volume is pushed out, which is not the origin.
+        for direction in directions {
+            let sent = model.body.radiated(toward: direction)[index].underlying
+            let size = (sent.real.value * sent.real.value + sent.imaginary.value * sent.imaginary.value).squareRoot()
+            #expect(abs(size / abs(air.volume.underlying) - 1) < 0.05, "\(sent) against \(air.volume)")
+        }
     }
 }

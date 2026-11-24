@@ -259,7 +259,11 @@ extension `Acoustics.Cavity Tests`.Body {
                 vertices: cavity.vertices.count,
                 loss: 0.01
             )
-            self.hole = .circle(radius: Space.Physical.metres(0.044), thickness: Space.Physical.metres(0.0025))
+            self.hole = .circle(
+                radius: Space.Physical.metres(0.044),
+                thickness: Space.Physical.metres(0.0025),
+                at: Point(x: 0.09, y: 0, z: 0)
+            )
         }
     }
 
@@ -358,7 +362,11 @@ extension `Acoustics.Cavity Tests`.Body {
                 vertices: cavity.vertices.count,
                 loss: 0.01
             )
-            self.rose = .circle(radius: Space.Physical.metres(0.04), thickness: Space.Physical.metres(0.002))
+            self.rose = .circle(
+                radius: Space.Physical.metres(0.04),
+                thickness: Space.Physical.metres(0.002),
+                at: Point(x: Self.along(35), y: 0, z: 0)
+            )
         }
     }
 

@@ -26,6 +26,8 @@ let package = Package(
         .package(url: "https://github.com/swift-molecules/swift-acoustics-plate.git", branch: "main"),
         .package(url: "https://github.com/swift-molecules/swift-acoustics-shell.git", branch: "main"),
         .package(url: "https://github.com/swift-atoms/swift-mesh.git", branch: "main"),
+        .package(url: "https://github.com/swift-atoms/swift-complex.git", branch: "main"),
+        .package(url: "https://github.com/swift-atoms/swift-numeric.git", branch: "main"),
     ],
     targets: [
         .target(
@@ -39,6 +41,8 @@ let package = Package(
                 .product(name: "Space", package: "swift-space"),
                 .product(name: "Frequency", package: "swift-frequency"),
                 .product(name: "Mass", package: "swift-mass"),
+                .product(name: "Complex", package: "swift-complex"),
+                .product(name: "Numeric", package: "swift-numeric"),
             ]
         ),
         .testTarget(
