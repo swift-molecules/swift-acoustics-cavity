@@ -101,9 +101,9 @@ extension `Acoustics.Cavity Tests`.Laws {
         #expect(throws: Acoustics.Cavity.Error.cell(1)) {
             try Acoustics.Cavity.Modes(Acoustics.Cavity(vertices: vertices, cells: [good, [0, 1, 2]]), count: 1)
         }
+        let missing = Acoustics.Cavity(vertices: vertices, cells: [[0, 1, 2, vertices.count]])
         #expect(throws: Acoustics.Cavity.Error.cell(0)) {
-            try Acoustics.Cavity.Modes(
-                Acoustics.Cavity(vertices: vertices, cells: [[0, 1, 2, vertices.count]]), count: 1)
+            try Acoustics.Cavity.Modes(missing, count: 1)
         }
         // A tetrahedron with no volume, and a hexahedron folded through itself.
         #expect(throws: Acoustics.Cavity.Error.cell(0)) {

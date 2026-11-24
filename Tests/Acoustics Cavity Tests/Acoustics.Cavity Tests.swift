@@ -20,11 +20,10 @@ extension `Acoustics.Cavity Tests` {
             for k in 0...nz {
                 for j in 0...ny {
                     for i in 0...nx {
-                        vertices.append(
-                            Point(
-                                x: x * Double(i) / Double(nx), y: y * Double(j) / Double(ny),
-                                z: z * Double(k) / Double(nz))
-                        )
+                        let u = Double(i) / Double(nx)
+                        let v = Double(j) / Double(ny)
+                        let w = Double(k) / Double(nz)
+                        vertices.append(Point(x: x * u, y: y * v, z: z * w))
                     }
                 }
             }

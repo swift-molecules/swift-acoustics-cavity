@@ -56,9 +56,6 @@ extension Acoustics.Cavity {
 }
 
 extension Acoustics.Cavity.System {
-    typealias Hexahedron = Galerkin.Reference.Hexahedron
-    typealias Tetrahedron = Galerkin.Reference.Tetrahedron
-
     /// A reference cell's shape functions at its Gauss points, which every cell of that kind shares.
     struct Rule {
         let shapes: [Galerkin.Shape<Double>]
@@ -73,12 +70,12 @@ extension Acoustics.Cavity.System {
         let cube = Galerkin.Reference.Hexahedron.quadrature(degree: 3, Double.self)
         let simplex = Galerkin.Reference.Tetrahedron.quadrature(degree: 2, Double.self)
         let hexahedron = Rule(
-            shapes: cube.points.map { Hexahedron.shape(at: $0) },
+            shapes: cube.points.map { Galerkin.Reference.Hexahedron.shape(at: $0) },
             weights: cube.weights,
             turned: [4, 5, 6, 7, 0, 1, 2, 3]
         )
         let tetrahedron = Rule(
-            shapes: simplex.points.map { Tetrahedron.shape(at: $0) },
+            shapes: simplex.points.map { Galerkin.Reference.Tetrahedron.shape(at: $0) },
             weights: simplex.weights,
             turned: [0, 2, 1, 3]
         )
