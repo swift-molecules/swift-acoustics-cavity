@@ -208,7 +208,7 @@ extension `Acoustics.Cavity Tests`.Body {
             let eyb = q22b / (1 + q22b * nu * nu / ex)
             var barred = material
             barred.young.y = Modulus.Young.amount(eyb)
-            barred.poisson = Poisson.amount(nu)
+            barred.poisson = Strain.Ratio.amount(nu)
             barred.shear.yz = Modulus.Shear.amount(
                 material.shear.yz.underlying + cover * wood.shear.longitudinalRadial.underlying * h / t
             )
